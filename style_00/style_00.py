@@ -5,6 +5,8 @@ config = {}
 with open('example.json', 'r') as file:
     config = json.load(file)
 
+
+# Scene 0
 scene_0c0 = VideoFileClip(config['files'][0], audio=False).\
                crop(486, 180, 1196, 570)
 
