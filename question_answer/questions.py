@@ -1,3 +1,4 @@
+import numpy as np
 from moviepy.editor import *
 from moviepy.video.VideoClip import ImageClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
@@ -6,6 +7,7 @@ from moviepy.video.fx.all import *
 
 sys.path.append('../') # this will add the parent directory to the path
 from image_fx import pulse
+from image_edit import clip_img_format
 
 import json
 
@@ -38,9 +40,8 @@ for question in config['questions']:
     # # Create ImageClip
     question_text_clip = (TextClip(question_text, fontsize=30, color='white', font="Arial").set_position('left').set_duration(5))
     answer_text_clip = (TextClip(answer_text, fontsize=30, color='white', font="Arial").set_position('left').set_duration(5))
-    answer_image_clip = ImageClip(answer_image).set_duration(4)
+    answer_image_clip = ImageClip(np.array(clip_img_format(answer_image))).set_duration(4)
     # apply the effect to the ImageClip
-
 
     answer_image_clip = answer_image_clip.resize(lambda t : pulse(t)).set_pos('center')
     answer_image_clip = answer_image_clip.set_pos('right')
