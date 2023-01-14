@@ -1,0 +1,27 @@
+{
+    "title": "example_quiz_upload",
+    "intro": "../assets_test/test_input_2.mp4",
+    "question_template": "../question_template.mp4",
+    "questions": [
+        {
+            "question_text": "Question?",
+            "answer_text": "The Answer",
+            "answer_image": "../assets_img/test.jpg"
+        },
+        {
+            "question_text": "Question2?",
+            "answer_text": "The Answer2",
+            "answer_image": "../assets_img/test.PNG"
+        },
+        {
+            "question_text": "Question?",
+            "answer_text": "The Answer",
+            "answer_image": "../assets_img/test.jpg"
+        },
+        {
+            "question_text": "Question2?",
+            "answer_text": "The Answer2",
+            "answer_image": "../assets_img/test.PNG"
+        }
+    ]
+}
