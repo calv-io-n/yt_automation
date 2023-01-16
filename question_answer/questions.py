@@ -51,7 +51,7 @@ for question in config['questions']:
     # transition_mask = VideoFileClip("../assets_test/vecteezy_subscribe-button-icon-motion-with-alpha-channel-free-video_7836609_479.mov", audio=False, has_mask=True)
   
     # # Overlay text on image
-    scene = CompositeVideoClip([question_base_clip, transition_mask, question_text_clip, answer_text_clip, answer_image_clip])
+    scene = CompositeVideoClip([question_base_clip, question_text_clip, answer_text_clip, answer_image_clip])
 
     TOTAL_GENERATED_CLIPS.append(scene)
 
