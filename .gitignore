@@ -3,6 +3,8 @@ assets_test
 __pycache__
 
 *.mp4
+*.mp3
+*.wav
 *.mov
 *.PNG
 *.png
