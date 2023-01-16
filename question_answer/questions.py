@@ -6,7 +6,7 @@ from moviepy.video.fx.all import *
 # from moviepy.video.tools.subtitles import SubtitlesClip
 
 sys.path.append('../') # this will add the parent directory to the path
-from image_fx import pulse
+from image_fx import pulse, fadeout
 from image_edit import clip_img_format
 
 import json
@@ -41,8 +41,9 @@ for question in config['questions']:
     question_text_clip = (TextClip(question_text, fontsize=30, color='white', font="Arial").set_position('left').set_duration(5))
     answer_text_clip = (TextClip(answer_text, fontsize=30, color='white', font="Arial").set_position('left').set_duration(5))
     answer_image_clip = ImageClip(np.array(clip_img_format(answer_image))).set_duration(4)
-    # apply the effect to the ImageClip
 
+    # apply the effect to the ImageClip
+    answer_image_clip = answer_image_clip.fadeout(2, color=(255,255,255))
     answer_image_clip = answer_image_clip.resize(lambda t : pulse(t)).set_pos('center')
     answer_image_clip = answer_image_clip.set_pos('right')
   

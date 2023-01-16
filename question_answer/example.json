@@ -1,6 +1,11 @@
 {
     "title": "example_quiz_upload",
     "intro": "../assets_test/test_input_2.mp4",
+    "category_images": [
+        "../assets_img/test.jpg",
+        "../assets_img/test.jpg",
+        "../assets_img/test.jpg"
+    ],
     "question_template": "../question_template.mp4",
     "questions": [
         {
