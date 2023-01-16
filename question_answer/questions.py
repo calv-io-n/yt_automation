@@ -43,12 +43,15 @@ for question in config['questions']:
     answer_image_clip = ImageClip(np.array(clip_img_format(answer_image))).set_duration(4)
 
     # apply the effect to the ImageClip
-    answer_image_clip = answer_image_clip.fadeout(2, color=(255,255,255))
+    # answer_image_clip = answer_image_clip.fadeout(2, color=(255,255,255))
     answer_image_clip = answer_image_clip.resize(lambda t : pulse(t)).set_pos('center')
     answer_image_clip = answer_image_clip.set_pos('right')
+
+
+    # transition_mask = VideoFileClip("../assets_test/vecteezy_subscribe-button-icon-motion-with-alpha-channel-free-video_7836609_479.mov", audio=False, has_mask=True)
   
     # # Overlay text on image
-    scene = CompositeVideoClip([question_base_clip, question_text_clip, answer_text_clip, answer_image_clip])
+    scene = CompositeVideoClip([question_base_clip, transition_mask, question_text_clip, answer_text_clip, answer_image_clip])
 
     TOTAL_GENERATED_CLIPS.append(scene)
 
