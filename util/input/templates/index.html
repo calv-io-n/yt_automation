@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Video</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* Basic Reset */
+        body, h1, h2, h3, h4, h5, h6, p, ol, ul {
+            margin: 0;
+            padding: 0;
+            font-weight: normal;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        #content {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: 'Arial', sans-serif;
+            margin-top: 10px;
+        }
+
+        #videoForm {
+            margin-bottom: 20px;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        #urlList ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+
+        #spinner {
+            color: #007bff;
+            font-style: italic;
+        }
+
+        #result a {
+            color: #007bff;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        #result a:hover {
+            color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="content">
+    <h2>Create Video</h2>
+    <form id="videoForm">
+        Reddit URLs (one per line): 
+        <textarea id="reddit_url_textarea" rows="4"></textarea>
+        <input type="submit" value="Create Video" style="margin-top: 15px;">
+    </form>
+
+    <div id="urlList" style="margin-top: 15px;"></div>
+    <div id="spinner" style="display: none;">Creating video...</div>
+    <div id="result" style="display: none;"></div>
+</div>
+
+<script>
+    function updateUrlList() {
+        const urls = $("#reddit_url_textarea").val().split("\n");
+        let htmlList = '<ul>';
+
+        urls.forEach(url => {
+            if (url.trim() !== "") {
+                htmlList += `<li>${url.trim()}</li>`;
+            }
+        });
+
+        htmlList += '</ul>';
+        $("#urlList").html(htmlList);
+    }
+
+    $("#reddit_url_textarea").on("input", updateUrlList);
+
+    $("#videoForm").submit(function(e) {
+        e.preventDefault();
+
+        $("#spinner").show();
+        $("#result").hide().text('');
+
+        // Creating the data object with the Reddit URLs as an array
+        const urls = $("#reddit_url_textarea").val().split("\n").filter(url => url.trim() !== "");
+        const data = {
+            reddit_url_list: urls
+        };
+
+        $.ajax({
+            url: '/create_video',
+            type: 'POST',
+            data: JSON.stringify(data),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function(response) {
+                $("#spinner").hide();
+
+                if (response.status === "success") {
+                    $("#result").text('Video created! Download here: ').append($('<a>').attr('href', response.link).text('Google Drive Link')).show();
+                } else {
+                    alert(response.message);
+                }
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

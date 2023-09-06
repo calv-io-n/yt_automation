@@ -12,3 +12,6 @@ __pycache__
 *.JPEG
 *.JPG
 *.jpg
+
+.env
+token.json
