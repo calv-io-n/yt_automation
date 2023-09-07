@@ -90,17 +90,21 @@ def parse_reddit_url(url):
     return {'subreddit': subreddit_name, 'post_id': post_id, 'comment_id': comment_id}
 
 def hide_topbar():
-    # Find all header tags on the page
-    header = drv.find_element(By.TAG_NAME, 'header')
-
-    print(header)
-
-    # Iterate through each header and hide it
-    drv.execute_script("arguments[0].remove();", header)
+    try:
+        # This targets the main header. Adjust the selector if the structure of Reddit's HTML changes.
+        header = drv.find_element(By.TAG_NAME, "header")
+        drv.execute_script("arguments[0].style.display = 'none';", header)
+        buttons = drv.find_elements(By.TAG_NAME, "button")
+        for button in buttons:
+            drv.execute_script("arguments[0].style.display = 'none';", button)
+        
+    except Exception as e:
+        print(f"Error while trying to hide the header: {e}")
 
 def get_comment(submission, post_id, comment_id):
     comment = submission.comments(comment_id)
     cmts = "https://www.reddit.com" + comment.permalink
+    
     drv.get(cmts)
     hide_topbar()
 
@@ -120,8 +124,9 @@ def get_comment(submission, post_id, comment_id):
 def get_post(submission, post_id):
     id = f"t3_{post_id}"
     cmts = "https://www.reddit.com" + submission.permalink
-    hide_topbar()
+
     drv.get(cmts)
+    hide_topbar()
 
     screenshot_path = None
     try:
