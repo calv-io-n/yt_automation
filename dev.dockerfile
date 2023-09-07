@@ -31,9 +31,11 @@ ENV FLASK_ENV=development
 ENV FLASK_APP=./util/input/main.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
-RUN chmod +x ./util/input/compile_movie.py
+# RUN chmod +x ./util/input/compile_movie.py
+RUN chmod +x ./util/input/reddit_webdriver.py
 
 # Custom start script to run the application
-CMD ["./util/input/compile_movie.py"]
+# CMD ["./util/input/compile_movie.py"]
+# CMD ["./util/input/reddit_webdriver.py"]
 
-# CMD ["./util/input/start.sh"]
+CMD ["./util/input/start.sh"]

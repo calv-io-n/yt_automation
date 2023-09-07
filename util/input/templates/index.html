@@ -83,6 +83,7 @@
 <div id="content">
     <h2>Create Video</h2>
     <form id="videoForm">
+        Post URL: <input type="text" id="post_url" required><br>
         Reddit URLs (one per line): 
         <textarea id="reddit_url_textarea" rows="4"></textarea>
         <input type="submit" value="Create Video" style="margin-top: 15px;">
@@ -110,8 +111,16 @@
 
     $("#reddit_url_textarea").on("input", updateUrlList);
 
+
     $("#videoForm").submit(function(e) {
         e.preventDefault();
+
+        // Check if post_url is filled
+        const postUrl = $("#post_url").val().trim();
+        if (!postUrl) {
+            alert("Please provide a Post URL.");
+            return;
+        }
 
         $("#spinner").show();
         $("#result").hide().text('');
@@ -119,7 +128,8 @@
         // Creating the data object with the Reddit URLs as an array
         const urls = $("#reddit_url_textarea").val().split("\n").filter(url => url.trim() !== "");
         const data = {
-            reddit_url_list: urls
+            post_url: postUrl,
+            comment_url_list: urls
         };
 
         $.ajax({

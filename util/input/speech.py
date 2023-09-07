@@ -2,6 +2,7 @@
 import os
 from elevenlabs import generate, set_api_key, voices
 from pydub.utils import mediainfo
+import uuid  # Add this import
 
 def generate_speech(text, save_path=None):
     # Set the API key from the environment variable
@@ -18,7 +19,6 @@ def generate_speech(text, save_path=None):
             index = i
             break
 
-
     if index == -1:
         raise ValueError("Voice not found.")
 
@@ -27,6 +27,9 @@ def generate_speech(text, save_path=None):
     
     # If save_path is provided, save the audio to the local file
     if save_path:
+        unique_string = str(uuid.uuid4())[:8]  # Create a random string from a UUID
+        save_path = os.path.join(save_path, unique_string + ".wav")  # Modify the save_path
+
         with open(save_path, 'wb') as file:
             file.write(audio)
 
@@ -35,7 +38,6 @@ def generate_speech(text, save_path=None):
 
         return audio_length, save_path
 
-
 if __name__ == '__main__':
     try:
         print("Generating speech...")
@@ -43,5 +45,3 @@ if __name__ == '__main__':
         print(result)
     except ValueError as e:
         print(e)
-
-    

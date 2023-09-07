@@ -1,6 +1,10 @@
+import os
+import random
 from flask import Flask, render_template, request, jsonify
-from reddit_webdriver import process_reddit_url
+from reddit_webdriver import process_reddit_urls, parse_reddit_url
 from speech import generate_speech
+from compile_movie import process_video_with_multiple_sounds
+from uploader import upload_to_drive
 
 app = Flask(__name__)
 
@@ -10,25 +14,60 @@ def index():
 
 @app.route('/create_video', methods=['POST'])
 def create_video():
-    # Checking if the request contains JSON data and the key 'reddit_url_list'
-    if not request.json or 'reddit_url_list' not in request.json:
+    # Checking if the request contains JSON data and the key 'post_url'
+
+    if not request.json or 'post_url' not in request.json:
         return jsonify({"status": "error", "message": "Missing JSON data."})
 
-    reddit_url_list = request.json['reddit_url_list']
-    text_screenshot_list = process_reddit_url(reddit_url_list)
+    post_id = parse_reddit_url(request.json['post_url']).get('post_id')
+    # Assuming post_id has been parsed using parse_reddit_url
+    post_folder_path = os.path.join('./util/input/reddit_posts', post_id)
+
+    # Check if the folder exists, if not, create it
+    if not os.path.exists(post_folder_path):
+        os.makedirs(post_folder_path)
+
+    # 1. Selenium Webdriver Retrieval
+    print("Processing Reddit URLs...")
+    post_url = request.json['post_url']
+    comment_url_list = request.json['comment_url_list']
+    text_screenshot_list = process_reddit_urls(post_url, comment_url_list)
+
+    print(text_screenshot_list)
 
     if not text_screenshot_list:
         return jsonify({"status": "error", "message": "Error processing Reddit URLs."})
 
+    # 2. Text-to-Speech
+    print("Processing text to speech...")
+    image_audio_pairs = []
 
-    speech_results = []
-    for text in text_screenshot_list[0]:
-        print(text)
-        speech_result = generate_speech(text)
-        speech_results.append(speech_result)
+    # Do Title to maybe separate hook further out
+    title_speech_result = generate_speech(text_screenshot_list[0].get('title'), post_folder_path)
+    image_audio_pairs.append(text_screenshot_list[0].get('screenshot_path'),title_speech_result.get('audio_path'))
 
-    # You can then process the speech_results list however you want.
-    # For instance, you can combine them to create a video or upload them somewhere
+    # Process the rest of the text
+    for reddit_element in text_screenshot_list:
+        rest_speech_result = generate_speech(reddit_element.get('text'), post_folder_path)
+        image_audio_pairs.append(reddit_element.get('screenshot_path'),rest_speech_result.get('audio_path'))
+
+
+    # 3. Video Compilation
+    print("Processing video...")
+    subfolder_path = "./util/input/starters"
+
+    mp4_files = [f for f in os.listdir(subfolder_path) if f.endswith('.mp4')]
+    if not mp4_files:
+        print("No MP4 files found in the subfolder!")
+        exit()
+
+    random_video = random.choice(mp4_files)
+    video_path = os.path.join(subfolder_path, random_video)
+    silent_audio_path = "./util/input/silent.mp3"
+    finished_path = process_video_with_multiple_sounds(video_path, image_audio_pairs, silent_audio_path)
+
+    # 4. Upload to Google Drive
+    upload_to_drive(finished_path)
 
     # Mock results for demonstration
     success = True

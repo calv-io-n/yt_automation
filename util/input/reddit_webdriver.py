@@ -1,13 +1,14 @@
+#!/usr/bin/python3
+
 import os
 from selenium.webdriver import Chrome, ChromeOptions
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
-import praw
 from time import sleep
 from pyvirtualdisplay import Display
+import praw
 
 def set_mobile_resolution():
     drv.set_window_size(375, 812)
@@ -67,7 +68,6 @@ def login():
 
     sleep(timeout)
 
-
 def scroll_to_element(element):
     drv.execute_script("arguments[0].scrollIntoView(true);", element)
     sleep(2)  # Give it a moment to scroll
@@ -75,73 +75,92 @@ def scroll_to_element(element):
 def parse_reddit_url(url):
     components = url.split("/")
 
+    # Clean up the components by removing empty strings
+    components = [c for c in components if c]
+
     # Ensure the URL is a valid Reddit URL
-    if 'www.reddit.com' not in components:
-        return None, None, None
-    
-    # Ensure the URL contains 'r' and 'comments' indicating it's a post or comment URL
-    if 'r' not in components or 'comments' not in components:
-        return None, None, None
-    
-    # Extract subreddit name
+    if not any(domain in components for domain in ['www.reddit.com', 'reddit.com']):
+        return {'subreddit': None, 'post_id': None, 'comment_id': None}
+
+    # Extract details
+    subreddit_name = components[components.index('r') + 1] if 'r' in components else None
+    post_id = components[components.index('comments') + 1] if 'comments' in components else None
+    comment_id = components[components.index('comments') + 3] if 'comments' in components and len(components) > components.index('comments') + 3 else None
+
+    return {'subreddit': subreddit_name, 'post_id': post_id, 'comment_id': comment_id}
+
+def hide_topbar():
+    # Find all header tags on the page
+    header = drv.find_element(By.TAG_NAME, 'header')
+
+    print(header)
+
+    # Iterate through each header and hide it
+    drv.execute_script("arguments[0].remove();", header)
+
+def get_comment(submission, post_id, comment_id):
+    comment = submission.comments(comment_id)
+    cmts = "https://www.reddit.com" + comment.permalink
+    drv.get(cmts)
+    hide_topbar()
+
+    id = f"t1_{comment_id}"
+    screenshot_path = None
     try:
-        r_index = components.index('r')
-        subreddit_name = components[r_index + 1]
-    except (ValueError, IndexError):
-        subreddit_name = None
+        cmt = WebDriverWait(drv, timeout).until(lambda x: x.find_element(By.ID, id))
+        scroll_to_element(cmt)
+    except TimeoutException:
+        print("Page load timed out...")
+    else:
+        screenshot_path = f"./util/input/reddit_posts/{post_id}/{post_id}_{id}.png"
+        cmt.screenshot(screenshot_path)
+        
+    return {"text": comment.body, "screenshot_path": screenshot_path}
+
+def get_post(submission, post_id):
+    id = f"t3_{post_id}"
+    cmts = "https://www.reddit.com" + submission.permalink
+    hide_topbar()
+    drv.get(cmts)
+
+    screenshot_path = None
+    try:
+        cmt = WebDriverWait(drv, timeout).until(lambda x: x.find_element(By.ID, id))
+        scroll_to_element(cmt)
+    except TimeoutException:
+        print("Page load timed out...")
+    else:
+        screenshot_path = f"./util/input/reddit_posts/{post_id}/{post_id}_{id}.png"
+        cmt.screenshot(screenshot_path)
     
-    # Extract post ID
-    try:
-        post_index = components.index('comments')
-        post_id = components[post_index + 1]
-    except (ValueError, IndexError):
-        post_id = None
+    return {"title": submission.title, "text": submission.selftext, "screenshot_path": screenshot_path}
 
-    # Extract the comment ID if exists
-    try:
-        comment_index = components.index('comment')
-        comment_id = components[comment_index + 1]
-    except (ValueError, IndexError):
-        comment_id = None
-
-    return subreddit_name, post_id, comment_id
-
-def get_comments(subreddit_name, post_id, comment_id=None):
-    post = r.submission(id=post_id)
-    post.comments.replace_more(limit=None)
-    comments = post.comments.list()
-
-    comment_details = []  # List to store details about each comment
-
-    for comment in comments:
-        cmts = "https://www.reddit.com" + post.permalink
-        drv.get(cmts)
-
-        id = f"t1_{comment.id}"
-        try:
-            cmt = WebDriverWait(drv, timeout).until(lambda x: x.find_element(By.ID, id))
-            scroll_to_element(cmt)
-        except TimeoutException:
-            print("Page load timed out...")
-        else:
-            screenshot_path = "./reddit_posts/" + post_id + "_" + id + ".png"
-            cmt.screenshot(screenshot_path)
-            comment_details.append({"text": comment.body, "screenshot_path": screenshot_path})
-
-    return comment_details  # Return the list
-
-def process_reddit_url(url_list):
+def process_reddit_urls(root_url, comment_url_list):
     login()
 
-    all_comment_details = []  # List to store details for all comments from all URLs
+    results = []
 
-    for url in url_list:
-        subreddit_name, post_id, comment_id = parse_reddit_url(url)
-        if post_id:
-            comment_details = get_comments(subreddit_name, post_id, comment_id)
-            all_comment_details.append(comment_details)  # Add details for comments of current URL
+    parsed_url = parse_reddit_url(root_url)
+    subreddit_name = parsed_url['subreddit']
+    post_id = parsed_url['post_id']
+    submission = r.submission(id=post_id)
+
+    results.append(get_post(submission, post_id))
+
+    for comment_url in comment_url_list:
+        parsed_comment_url = parse_reddit_url(comment_url)
+        subreddit_name = parsed_comment_url['subreddit']
+        post_id = parsed_comment_url['post_id']
+        comment_id = parsed_comment_url['comment_id']
+
+        if post_id and comment_id:
+            results.append(get_comment(submission, post_id, comment_id))
         else:
             print("Invalid Reddit URL")
     
-    return all_comment_details  # Return the combined list
+    return results  # Return the combined list of results
 
+if __name__ == "__main__":
+    r.submission('16bn0gy')
+    test = r.comment('jze38dn')
+    print(test.body)
