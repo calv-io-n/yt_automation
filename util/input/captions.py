@@ -76,53 +76,80 @@ def split_text_into_lines(data):
     return subtitles
 
 
-def create_caption(textJSON, framesize, font="Helvetica-Bold", fontsize=80, color='white', bgcolor='blue'):
+def create_caption(textJSON, framesize, font="Montserrat-ExtraBold", fontsize=80, color='white', bgcolor='purple'):
     wordcount = len(textJSON['textcontents'])
     full_duration = textJSON['end']-textJSON['start']
 
     word_clips = []
-    xy_textclips_positions = []
+    xy_textclips_positions =[]
     
     x_pos = 0
     y_pos = 0
+    # max_height = 0
     frame_width = framesize[0]
     frame_height = framesize[1]
     x_buffer = frame_width*1/10
     y_buffer = frame_height*1/5
 
-    for index, wordJSON in enumerate(textJSON['textcontents']):
-        duration = wordJSON['end']-wordJSON['start']
-        word_clip = TextClip(wordJSON['word'], font=font, fontsize=fontsize, color=color).set_start(textJSON['start']).set_duration(full_duration)
-        word_clip_space = TextClip(" ", font=font, fontsize=fontsize, color=color).set_start(textJSON['start']).set_duration(full_duration)
-        word_width, word_height = word_clip.size
-        space_width, space_height = word_clip_space.size
-        
-        if x_pos + word_width + space_width > frame_width - 2 * x_buffer:
+    space_width = ""
+    space_height = ""
+
+    for index,wordJSON in enumerate(textJSON['textcontents']):
+      duration = wordJSON['end']-wordJSON['start']
+      word_clip = TextClip(wordJSON['word'], font = font,fontsize=fontsize, color=color).set_start(textJSON['start']).set_duration(full_duration)
+      word_clip_space = TextClip(" ", font = font,fontsize=fontsize, color=color).set_start(textJSON['start']).set_duration(full_duration)
+      word_width, word_height = word_clip.size
+      space_width,space_height = word_clip_space.size
+      if x_pos + word_width+ space_width > frame_width-2*x_buffer:
+            # Move to the next line
             x_pos = 0
-            y_pos += word_height + 40
+            y_pos = y_pos+ word_height+40
 
-        xy_textclips_positions.append({
-            "x_pos": x_pos + x_buffer,
-            "y_pos": y_pos + y_buffer,
-            "width": word_width,
-            "height": word_height,
-            "word": wordJSON['word'],
-            "start": wordJSON['start'],
-            "end": wordJSON['end'],
-            "duration": duration
-        })
+            # Store info of each word_clip created
+            xy_textclips_positions.append({
+                "x_pos":x_pos+x_buffer,
+                "y_pos": y_pos+y_buffer,
+                "width" : word_width,
+                "height" : word_height,
+                "word": wordJSON['word'],
+                "start": wordJSON['start'],
+                "end": wordJSON['end'],
+                "duration": duration
+            })
 
-        word_clip.set_position((x_pos + x_buffer, y_pos + y_buffer))
-        word_clip_space.set_position((x_pos + word_width + x_buffer, y_pos + y_buffer))
-        x_pos += word_width + space_width
+            word_clip = word_clip.set_position((x_pos+x_buffer, y_pos+y_buffer))
+            word_clip_space = word_clip_space.set_position((x_pos+ word_width +x_buffer, y_pos+y_buffer))
+            x_pos = word_width + space_width
+      else:
+            # Store info of each word_clip created
+            xy_textclips_positions.append({
+                "x_pos":x_pos+x_buffer,
+                "y_pos": y_pos+y_buffer,
+                "width" : word_width,
+                "height" : word_height,
+                "word": wordJSON['word'],
+                "start": wordJSON['start'],
+                "end": wordJSON['end'],
+                "duration": duration
+            })
 
-        word_clips.append(word_clip)
-        word_clips.append(word_clip_space)
+            word_clip = word_clip.set_position((x_pos+x_buffer, y_pos+y_buffer))
+            word_clip_space = word_clip_space.set_position((x_pos+ word_width+ x_buffer, y_pos+y_buffer))
+
+            x_pos = x_pos + word_width+ space_width
+
+
+      word_clips.append(word_clip)
+      word_clips.append(word_clip_space)  
+      word_clips.append(word_clip_space)
+      word_clips.append(word_clip_space)  
+
 
     for highlight_word in xy_textclips_positions:
-        word_clip_highlight = TextClip(highlight_word['word'], font=font, fontsize=fontsize, color=color, bg_color=bgcolor).set_start(highlight_word['start']).set_duration(highlight_word['duration'])
-        word_clip_highlight.set_position((highlight_word['x_pos'], highlight_word['y_pos']))
-        word_clips.append(word_clip_highlight)
+      
+      word_clip_highlight = TextClip(highlight_word['word'], font = font,fontsize=fontsize, color=color,bg_color = bgcolor).set_start(highlight_word['start']).set_duration(highlight_word['duration'])
+      word_clip_highlight = word_clip_highlight.set_position((highlight_word['x_pos'], highlight_word['y_pos']))
+      word_clips.append(word_clip_highlight)
 
     return word_clips
 
@@ -135,17 +162,20 @@ def create_audiogram(input_video_filename, linelevel_subtitles, output_filename)
         out = create_caption(line, frame_size)
         all_linelevel_splits.extend(out)
 
-    input_video = VideoFileClip(input_video_filename)
-    input_video_duration = input_video.duration
-    background_clip = ColorClip(size=frame_size, color=(0, 0, 0)).set_duration(input_video_duration)
+    # Resize the original video to match the vertical resolution.
+    input_video = VideoFileClip(input_video_filename).resize(frame_size)
 
-    final_video = CompositeVideoClip([background_clip] + all_linelevel_splits)
+    # Layer the audiogram on top of the original video.
+    final_video = CompositeVideoClip([input_video] + all_linelevel_splits)
+    
     final_video = final_video.set_audio(input_video.audio)
 
     final_video.write_videofile(output_filename, fps=24, codec="libx264", audio_codec="aac")
 
 
 if __name__ == "__main__":
+    # print(TextClip.list('font'))
+
     audiofilename = "util/input/reddit_posts/16bn0gy/f64b296f.wav"
     videofilename = "output.mp4"
     output_filename = "sub_output.mp4"

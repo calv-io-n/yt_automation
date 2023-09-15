@@ -27,6 +27,7 @@ COPY ./util/input/policy.xml /etc/ImageMagick-6/policy.xml
 
 # Copy the rest of the application into the container
 COPY . .
+COPY ./font.ttf /usr/share/fonts/
 
 # Expose port 80
 EXPOSE 80
