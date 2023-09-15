@@ -19,6 +19,9 @@ RUN python3 -m pip install git+https://github.com/openai/whisper.git@248b6cb1242
 # Install Xvfb for GUI display capabilities
 RUN apt-get install -y xvfb
 
+COPY ./util/input/policy.xml /etc/ImageMagick-6/policy.xml
+
+
 # Note: Since you're using `selenium/standalone-chrome`, Google Chrome and Chromedriver are already installed. 
 # So, no need to reinstall them.
 

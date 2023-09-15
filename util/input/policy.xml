@@ -1,0 +1,3 @@
+<policymap>
+  <policys domain="path" rights="read|write" pattern="@*" />
+</policymap>
