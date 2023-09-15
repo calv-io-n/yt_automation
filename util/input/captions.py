@@ -141,8 +141,6 @@ def create_caption(textJSON, framesize, font="Montserrat-ExtraBold", fontsize=80
 
       word_clips.append(word_clip)
       word_clips.append(word_clip_space)  
-      word_clips.append(word_clip_space)
-      word_clips.append(word_clip_space)  
 
 
     for highlight_word in xy_textclips_positions:
@@ -155,19 +153,18 @@ def create_caption(textJSON, framesize, font="Montserrat-ExtraBold", fontsize=80
 
 
 def create_audiogram(input_video_filename, linelevel_subtitles, output_filename):
-    frame_size = (1080, 1080)
+    frame_size = (540, 960) # Important: This is the size of the video frame
     all_linelevel_splits = []
 
     for line in linelevel_subtitles:
         out = create_caption(line, frame_size)
         all_linelevel_splits.extend(out)
 
-    # Resize the original video to match the vertical resolution.
-    input_video = VideoFileClip(input_video_filename).resize(frame_size)
+    input_video = VideoFileClip(input_video_filename)
+    input_video_duration = input_video.duration
+    background_clip = ColorClip(size=frame_size, color=(0, 0, 0)).set_duration(input_video_duration)
 
-    # Layer the audiogram on top of the original video.
-    final_video = CompositeVideoClip([input_video] + all_linelevel_splits)
-    
+    final_video = CompositeVideoClip([background_clip] + all_linelevel_splits)
     final_video = final_video.set_audio(input_video.audio)
 
     final_video.write_videofile(output_filename, fps=24, codec="libx264", audio_codec="aac")
