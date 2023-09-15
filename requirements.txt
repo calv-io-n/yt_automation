@@ -10,3 +10,4 @@ pydub==0.25.1
 simpleaudio==1.0.4
 moviepy==1.0.3
 Pillow==10.0.0
+faster-whisper==0.7.0

@@ -83,6 +83,11 @@
 <div id="content">
     <h2>Create Video</h2>
     <form id="videoForm">
+        <label for="post_type">Post Type:</label>
+        <select id="post_type">
+            <option value="askReddit">AskReddit</option>
+            <option value="storyPost">StoryPost</option>
+        </select><br>
         Post URL: <input type="text" id="post_url" required><br>
         Reddit URLs (one per line): 
         <textarea id="reddit_url_textarea" rows="4"></textarea>

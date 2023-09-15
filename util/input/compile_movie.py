@@ -33,23 +33,34 @@ def image_and_sound_to_video(image_path, sound_path, video_size):
     
     return img_clip
 
-def process_video_with_multiple_sounds(video_path, image_audio_pairs, silent_audio_path):
+def process_video_with_multiple_sounds(video_path, image_audio_pairs, silent_audio_path, POST_TYPE):
     base_video = VideoFileClip(video_path)
     video_fps = base_video.fps  # Get fps from the original video
     
     silent_clip = AudioFileClip(silent_audio_path)
     clips = []
 
-    for image_path, audio_path in image_audio_pairs:
-        img_clip = image_and_sound_to_video(image_path, audio_path, base_video.size)
-        clips.append(img_clip)
-        clips.append(ColorClip(base_video.size, color=(0,0,0), duration=silent_clip.duration))  # black frame during silence
+    if POST_TYPE == "askReddit":
+        for image_path, audio_path in image_audio_pairs:
+            img_clip = image_and_sound_to_video(image_path, audio_path, base_video.size)
+            clips.append(img_clip)
+            clips.append(ColorClip(base_video.size, color=(0,0,0), duration=silent_clip.duration))  # black frame during silence
 
-    image_audio_sequence = concatenate_videoclips(clips[:-1])  # Excluding the last silent clip
-    image_audio_sequence.fps = video_fps  # Set fps for the concatenated clip
+        image_audio_sequence = concatenate_videoclips(clips[:-1])  # Excluding the last silent clip
+        image_audio_sequence.fps = video_fps  # Set fps for the concatenated clip
 
-    # Overlay the image-audio sequence onto the base video
-    composite_clip = CompositeVideoClip([base_video, image_audio_sequence.set_position("center").crossfadein(0.5)])
+        # Overlay the image-audio sequence onto the base video
+        composite_clip = CompositeVideoClip([base_video, image_audio_sequence.set_position("center").crossfadein(0.5)])
+    elif POST_TYPE == "storyPost":
+        print("storyPost")
+
+        if (len(image_audio_pairs) != 1):
+            raise("storyPost must have exactly one image_audio_pair")
+
+        image_path, audio_path = image_audio_pairs[0]
+
+        
+        
 
     composite_clip.write_videofile("output.mp4")
 

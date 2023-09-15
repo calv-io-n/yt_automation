@@ -19,6 +19,9 @@ def create_video():
     if not request.json or 'post_url' not in request.json:
         return jsonify({"status": "error", "message": "Missing JSON data."})
 
+    # Checking if the request contains JSON data and the key 'comment_url_list'
+    POST_TYPE = request.json['POST_TYPE']
+
     post_id = parse_reddit_url(request.json['post_url']).get('post_id')
     # Assuming post_id has been parsed using parse_reddit_url
     post_folder_path = os.path.join('./util/input/reddit_posts', post_id)
@@ -31,7 +34,7 @@ def create_video():
     print("Processing Reddit URLs...")
     post_url = request.json['post_url']
     comment_url_list = request.json['comment_url_list']
-    text_screenshot_list = process_reddit_urls(post_url, comment_url_list)
+    text_screenshot_list = process_reddit_urls(post_url, comment_url_list, POST_TYPE)
 
     print(text_screenshot_list)
 
@@ -64,7 +67,7 @@ def create_video():
     random_video = random.choice(mp4_files)
     video_path = os.path.join(subfolder_path, random_video)
     silent_audio_path = "./util/input/silent.mp3"
-    finished_path = process_video_with_multiple_sounds(video_path, image_audio_pairs, silent_audio_path)
+    finished_path = process_video_with_multiple_sounds(video_path, image_audio_pairs, silent_audio_path, POST_TYPE)
 
     # 4. Upload to Google Drive
     upload_to_drive(finished_path)

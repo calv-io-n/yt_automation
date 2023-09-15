@@ -140,7 +140,7 @@ def get_post(submission, post_id):
     
     return {"title": submission.title, "text": submission.selftext, "screenshot_path": screenshot_path}
 
-def process_reddit_urls(root_url, comment_url_list):
+def process_reddit_urls(root_url, comment_url_list, VIDEO_TYPE="askReddit"):
     login()
 
     results = []
@@ -150,20 +150,29 @@ def process_reddit_urls(root_url, comment_url_list):
     post_id = parsed_url['post_id']
     submission = r.submission(id=post_id)
 
-    results.append(get_post(submission, post_id))
 
-    for comment_url in comment_url_list:
-        parsed_comment_url = parse_reddit_url(comment_url)
-        subreddit_name = parsed_comment_url['subreddit']
-        post_id = parsed_comment_url['post_id']
-        comment_id = parsed_comment_url['comment_id']
+    if (VIDEO_TYPE == "askReddit"):
+        results.append(get_post(submission, post_id))
 
-        if post_id and comment_id:
-            results.append(get_comment(submission, post_id, comment_id))
-        else:
-            print("Invalid Reddit URL")
-    
-    return results  # Return the combined list of results
+        for comment_url in comment_url_list:
+            parsed_comment_url = parse_reddit_url(comment_url)
+            subreddit_name = parsed_comment_url['subreddit']
+            post_id = parsed_comment_url['post_id']
+            comment_id = parsed_comment_url['comment_id']
+
+            if post_id and comment_id:
+                results.append(get_comment(submission, post_id, comment_id))
+            else:
+                print("Invalid Reddit URL")
+        
+        return results
+    elif (VIDEO_TYPE == "storyPost"):
+        # get post title
+        print('get post title')
+
+        # get post text
+ 
+    return None
 
 if __name__ == "__main__":
     r.submission('16bn0gy')
