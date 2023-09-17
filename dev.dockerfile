@@ -44,6 +44,7 @@ ENV FLASK_RUN_HOST=0.0.0.0
 # CMD ["./util/input/compile_movie.py"]
 # CMD ["./util/input/reddit_webdriver.py"]
 # CMD ["./util/input/reddit_webdriver.py"]
-CMD ["./util/input/captions.py"]
+# CMD ["./util/input/captions.py"]
+# CMD ["./util/input/uploader.py"]
 
-# CMD ["./util/input/start.sh"]
+CMD ["./util/input/start.sh"]

@@ -16,6 +16,8 @@ def index():
 def create_video():
     # Checking if the request contains JSON data and the key 'post_url'
 
+    print(request.json)
+
     if not request.json or 'post_url' not in request.json:
         return jsonify({"status": "error", "message": "Missing JSON data."})
 
@@ -47,13 +49,13 @@ def create_video():
 
     # Do Title to maybe separate hook further out
     title_speech_result = generate_speech(text_screenshot_list[0].get('title'), post_folder_path)
-    image_audio_pairs.append(text_screenshot_list[0].get('screenshot_path'),title_speech_result.get('audio_path'))
+    print(title_speech_result)
+    image_audio_pairs.append((text_screenshot_list[0].get('screenshot_path'),title_speech_result.get('save_path')))
 
     # Process the rest of the text
     for reddit_element in text_screenshot_list:
         rest_speech_result = generate_speech(reddit_element.get('text'), post_folder_path)
-        image_audio_pairs.append(reddit_element.get('screenshot_path'),rest_speech_result.get('audio_path'))
-
+        image_audio_pairs.append((reddit_element.get('screenshot_path'),rest_speech_result.get('save_path')))
 
     # 3. Video Compilation
     print("Processing video...")

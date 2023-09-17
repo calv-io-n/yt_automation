@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os.path
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
@@ -26,5 +27,5 @@ def upload_to_drive(filename, mimetype='video/mp4', folder_id='1unhTeJ1gvCn7Uc-Z
 
 
 if __name__ == '__main__':
-    filename = '/home/calvion/programming/yt_automation/util/input/youtube_rewind2019_for_the_record_youtuberewind.mp4'
+    filename = '/usr/src/app/sub_output.mp4'
     upload_to_drive(filename)

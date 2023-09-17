@@ -127,6 +127,13 @@
             return;
         }
 
+        const post_type = $("#post_type").val().trim();
+        if (!postUrl) {
+            alert("Please provide a Post Type.");
+            return;
+        }
+
+
         $("#spinner").show();
         $("#result").hide().text('');
 
@@ -134,7 +141,8 @@
         const urls = $("#reddit_url_textarea").val().split("\n").filter(url => url.trim() !== "");
         const data = {
             post_url: postUrl,
-            comment_url_list: urls
+            comment_url_list: urls,
+            POST_TYPE: post_type
         };
 
         $.ajax({

@@ -165,14 +165,15 @@ def process_reddit_urls(root_url, comment_url_list, VIDEO_TYPE="askReddit"):
             else:
                 print("Invalid Reddit URL")
         
-        return results
     elif (VIDEO_TYPE == "storyPost"):
-        # get post title
-        print('get post title')
-
         # get post text
+        parsed_url = parse_reddit_url(root_url)
+        subreddit_name = parsed_url['subreddit']
+        post_id = parsed_url['post_id']
+        submission = r.submission(id=post_id)
+        results.append(get_post(submission, post_id))
  
-    return None
+    return results
 
 if __name__ == "__main__":
     r.submission('16bn0gy')

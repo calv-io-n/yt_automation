@@ -76,7 +76,7 @@ def split_text_into_lines(data):
     return subtitles
 
 
-def create_caption(textJSON, framesize, font="Montserrat-ExtraBold", fontsize=80, color='white', bgcolor='purple'):
+def create_caption(textJSON, framesize, font="Montserrat-ExtraBold", fontsize=30, color='white', bgcolor='purple'):
     wordcount = len(textJSON['textcontents'])
     full_duration = textJSON['end']-textJSON['start']
 
@@ -161,8 +161,9 @@ def create_audiogram(input_video_filename, linelevel_subtitles, output_filename)
         all_linelevel_splits.extend(out)
 
     input_video = VideoFileClip(input_video_filename)
-    input_video_duration = input_video.duration
-    background_clip = ColorClip(size=frame_size, color=(0, 0, 0)).set_duration(input_video_duration)
+    # input_video_duration = input_video.duration
+    # background_clip = ColorClip(size=frame_size, color=(0, 0, 0)).set_duration(input_video_duration)
+    background_clip = input_video
 
     final_video = CompositeVideoClip([background_clip] + all_linelevel_splits)
     final_video = final_video.set_audio(input_video.audio)

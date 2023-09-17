@@ -36,7 +36,7 @@ def generate_speech(text, save_path=None):
         audio_info = mediainfo(save_path)
         audio_length = float(audio_info['duration'])  # This will give the duration in seconds
 
-        return audio_length, save_path
+        return { "audio_length": audio_length, "save_path": save_path }
 
 if __name__ == '__main__':
     try:
